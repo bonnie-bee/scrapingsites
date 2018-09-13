@@ -13,19 +13,31 @@ db.on("error", function(error) {
 });
 
 app.get("/", function(req, res){
-    res.send("WHAT TIME IS IT")
+    res.send("SHOW ME THE MOVIES    ")
 });
 
 
 app.get("/api/scraping", function(req, res){
-    request("https://www.timeanddate.com/worldclock/", function(error, response, html){
+    request("http://www.afi.com/100Years/quotes.aspx", function(error, response, html){
         const $ = cheerio.load(html);
-        $("td.rbi").each(function(i, element){
+        let scrapeArr = [];
+        // let quoteArr = [];
+        // let movieArr = [];
+        // let yearArr = [];
+        $("td.lttext").each(function(i, element){
             const title = $(element).text();
-            // const link = $(element).children().attr("href");
-
-            db.scrapedData.insert({article: title})
+            const link = $(element).find("p").text();
+            scrapeArr.push(link);
         })
+        scrapeArr.splice([0], 4);
+        scrapeArr.pop();
+        //scrape array division here
+        // console.log("quotes: ", quoteArr);
+        // console.log("movies: ", movieArr);
+        // console.log("year", yearArr);
+
+        // db.scrapedData.insert({test: practArr})
+
     })
     res.send("Butts!")
 })
