@@ -1,5 +1,5 @@
 module.exports = {
-    Picture: require("./Pictures"),
-    Note: require("./Note")
+    Picture: require("./pictures"),
+    Note: require("./note")
   };
   
