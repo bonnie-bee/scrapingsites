@@ -1,50 +1,53 @@
 const express = require("express");
 const mongojs = require("mongojs");
+const mongoose = require("mongoose");
 const request = require("request");
 const cheerio = require("cheerio");
+const bodyParser = require("body-parser");
+const db = require("./models");
+
 
 const app = express();
 
-const database = "scrapingTimes";
-const collections = ["theTimes"];
-const db = mongojs(database, collections);
-db.on("error", function(error) {
-    console.log("databse error: ", error);
-});
 
-app.get("/", function(req, res){
-    res.send("SHOW ME THE MOVIES    ")
-});
+app.use(bodyParser.urlencoded({ extended: true })); 
+app.use(express.static("public"));
+
+var MONGODB_URI = process.env.MONGOLAB_BLUE_URI || "mongodb://localhost/scrapingSecrets";
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
+
+// app.get("/", function (req, res) {
+//     res.render("index");
+// });
 
 
-app.get("/api/scraping", function(req, res){
-    request("http://www.afi.com/100Years/quotes.aspx", function(error, response, html){
+app.get("/api/scraping", function (req, res) {
+    request("https://postsecret.com/", function (error, response, html) {
         const $ = cheerio.load(html);
-        let scrapeArr = [];
-        // let quoteArr = [];
-        // let movieArr = [];
-        // let yearArr = [];
-        $("td.lttext").each(function(i, element){
-            const title = $(element).text();
-            const link = $(element).find("p").text();
-            scrapeArr.push(link);
+        let getPic=1;
+        $("img.alignnone").each(function (i, element) {
+            const link = $(element).attr("src");
+            db.Picture.create({ pictureSrc: link }, function(err){
+                if(err){
+                    let message= "You've already scraped all the secrets this week. Come back on Sunday for more.";
+                    console.log("These already exist!");
+                    res.send(message);
+                    getPic=2;
+                }
+            })
+            console.log(getPic);
+            if(getPic=2)
+            {return false};
         })
-        scrapeArr.splice([0], 4);
-        scrapeArr.pop();
-        //scrape array division here
-        // console.log("quotes: ", quoteArr);
-        // console.log("movies: ", movieArr);
-        // console.log("year", yearArr);
-
-        // db.scrapedData.insert({test: practArr})
+        
 
     })
-    res.send("Butts!")
 })
 
-app.get("/api/showMeTheScrapes", function(req, res){
-    db.scrapedData.find({}, function(err, data){
-        if(err) {
+app.get("/showMeTheScrapes", function (req, res) {
+    db.Picture.find({}, function (err, data) {
+        if (err) {
             console.log(err);
         } else {
             res.json(data);
@@ -52,6 +55,12 @@ app.get("/api/showMeTheScrapes", function(req, res){
     })
 })
 
-app.listen(3000, function() {
-    console.log("Check out Port 3000")
+app.get("/showMeTheScrapes/:id", function(req, res){
+    db.Picture.find({"_id": req.params.id}, function(err, data) {
+
+    } )
+})
+
+app.listen(3001, function () {
+    console.log("Run! Quickly! To port 3001!")
 });
