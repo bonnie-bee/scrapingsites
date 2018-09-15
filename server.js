@@ -61,6 +61,6 @@ app.get("/showMeTheScrapes/:id", function(req, res){
     } )
 })
 
-app.listen(3001, function () {
+app.listen(process.env.PORT || 3001, function () {
     console.log("Run! Quickly! To port 3001!")
 });
